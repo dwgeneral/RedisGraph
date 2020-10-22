@@ -313,3 +313,14 @@ class testQueryValidationFlow(FlowTestsBase):
         actual_result = redis_graph.query(query)
         expected_result = [[34]]
         self.env.assertEquals(actual_result.result_set, expected_result)
+
+    # Applying a filter for a non-boolean constant should raise a compile-time error.
+    def test22_invalid_constant_filter(self):
+        try:
+            query = """MATCH (a) WHERE 1 RETURN a"""
+            redis_graph.query(query)
+            assert(False)
+        except redis.exceptions.ResponseError as e:
+            # Expecting an error.
+            assert("Expected boolean predicate" in e.message)
+            pass
